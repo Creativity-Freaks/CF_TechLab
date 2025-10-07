@@ -7,9 +7,9 @@ export const About = () => {
   return (
     <section id="about" className="py-24 relative overflow-hidden">
       {/* About: soft horizontal gradient + faint dot pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,hsl(var(--background))_0%,hsl(var(--background))/0.97_35%,hsl(var(--background))/0.94_65%,hsl(var(--background))_100%)]" />
-      <div className="absolute inset-0 opacity-[0.12] bg-[radial-gradient(circle_at_8%_15%,hsl(var(--primary))/0.35,transparent_55%),radial-gradient(circle_at_92%_85%,hsl(var(--accent-cyan))/0.30,transparent_55%),radial-gradient(circle_at_50%_50%,hsl(var(--accent-magenta))/0.18,transparent_60%)] mix-blend-lighten" />
-      <div className="absolute inset-0 pointer-events-none opacity-[0.18] bg-[radial-gradient(circle,#fff_1px,transparent_1.5px)] bg-[size:22px_22px] [mask-image:radial-gradient(circle_at_50%_50%,#000_65%,transparent_100%)]" />
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none z-0 bg-[linear-gradient(90deg,hsl(var(--background))_0%,hsl(var(--background))/0.97_35%,hsl(var(--background))/0.94_65%,hsl(var(--background))_100%)]" />
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none z-0 opacity-[0.12] bg-[radial-gradient(circle_at_8%_15%,hsl(var(--primary))/0.35,transparent_55%),radial-gradient(circle_at_92%_85%,hsl(var(--accent-cyan))/0.30,transparent_55%),radial-gradient(circle_at_50%_50%,hsl(var(--accent-magenta))/0.18,transparent_60%)] mix-blend-lighten" />
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none z-0 opacity-[0.18] bg-[radial-gradient(circle,#fff_1px,transparent_1.5px)] bg-[size:22px_22px] [mask-image:radial-gradient(circle_at_50%_50%,#000_65%,transparent_100%)]" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-hero">
