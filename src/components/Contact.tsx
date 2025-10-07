@@ -116,7 +116,7 @@ export const Contact = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Email</h3>
                   <a href="mailto:tech@creativityfreaks.com" className="text-muted-foreground hover:text-primary transition-colors">
-                    tech@creativityfreaks.com
+                    hcsarker2002@gmail.com
                   </a>
                 </div>
               </div>
@@ -127,8 +127,8 @@ export const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">Phone</h3>
-                  <a href="tel:+15551234567" className="text-muted-foreground hover:text-accent transition-colors">
-                    +1 (555) 123-4567
+                  <a href="tel:+8801642948324" className="text-muted-foreground hover:text-accent transition-colors">
+                    +8801642948324 (WhatsApp Available)
                   </a>
                 </div>
               </div>
@@ -140,8 +140,8 @@ export const Contact = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Location</h3>
                   <p className="text-muted-foreground">
-                    Innovation District<br />
-                    Tech Hub, Suite 404
+                    Dhaka Division<br />
+                    Banani, Dhaka, Bangladesh
                   </p>
                 </div>
               </div>
