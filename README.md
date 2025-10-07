@@ -133,6 +133,10 @@ SMTP_USER=your_user
 SMTP_PASS=your_pass
 SMTP_SECURE=false
 MAIL_FROM="CF TechLab <no-reply@example.com>"
+# Email notification toggles
+ENABLE_EMAIL=true
+# Where internal notifications are delivered (defaults to MAIL_FROM when unset)
+NOTIFY_TO=owner@example.com
 ```
 
 Optional root `.env` for deployment differences:
@@ -146,6 +150,21 @@ VITE_API_BASE=https://api.example.com
 ## 6. Environment
 
 See `.env` examples above. Do not commit real secrets. Consider using Doppler / 1Password / Vault in production.
+
+### Email Setup (Notifications)
+
+To enable email notifications for service requests, contact messages, and testimonials:
+
+1. Copy `server/.env.example` to `server/.env`.
+2. Provide valid SMTP credentials (Gmail App Password or Ethereal test account).
+3. Set `ENABLE_EMAIL=true`.
+4. Restart backend: inside `server/` run `npm run dev`.
+5. Test endpoints:
+   - `POST /api/contact`
+   - `POST /api/service-request`
+   - `POST /api/testimonial-submit` (optional `email` field for user receipt)
+
+If `ENABLE_EMAIL` is false or SMTP variables missing, emails are skipped gracefully.
 
 ---
 

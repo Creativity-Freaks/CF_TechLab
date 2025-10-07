@@ -8,12 +8,13 @@ import { Star, Upload } from 'lucide-react';
 interface FormState {
   name: string;
   role: string;
+  email: string; // optional for user receipt
   content: string;
   rating: number;
   imageFile: File | null;
 }
 
-const initial: FormState = { name: '', role: '', content: '', rating: 5, imageFile: null };
+const initial: FormState = { name: '', role: '', email: '', content: '', rating: 5, imageFile: null };
 
 export function TestimonialSubmit() {
   const [form, setForm] = useState<FormState>(initial);
@@ -31,12 +32,14 @@ export function TestimonialSubmit() {
     setError(null); setSuccess(null);
     if (!form.name.trim()) return setError('Name required');
     if (!form.role.trim()) return setError('Role required');
-    if (form.content.trim().length < 10) return setError('Content must be at least 10 chars');
+  if (form.content.trim().length < 10) return setError('Content must be at least 10 chars');
+  if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) return setError('Invalid email');
     if (!form.imageFile) return setError('Image required');
     const fd = new FormData();
     fd.append('name', form.name);
     fd.append('role', form.role);
-    fd.append('content', form.content);
+  fd.append('content', form.content);
+  if (form.email) fd.append('email', form.email);
     fd.append('rating', String(form.rating));
     fd.append('image', form.imageFile);
     setSubmitting(true);
@@ -75,7 +78,7 @@ export function TestimonialSubmit() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && <div className="text-sm p-3 rounded border border-destructive/40 bg-destructive/10 text-destructive">{error}</div>}
             {success && <div className="text-sm p-3 rounded border border-green-600/40 bg-green-600/10 text-green-500">Thanks! Your testimonial was submitted. Ref: {success}</div>}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">Name</label>
                 <Input value={form.name} onChange={e => update('name', e.target.value)} placeholder="Your name" />
@@ -83,6 +86,10 @@ export function TestimonialSubmit() {
               <div>
                 <label className="text-sm font-medium mb-1 block">Role / Company</label>
                 <Input value={form.role} onChange={e => update('role', e.target.value)} placeholder="CTO, Startup" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Email (optional)</label>
+                <Input type="email" value={form.email} onChange={e => update('email', e.target.value)} placeholder="you@example.com" />
               </div>
             </div>
             <div>

@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { createTestimonial } from '../store.js';
+import { queueEmail } from '../email.js';
 import { z } from 'zod';
 
 const uploadDir = path.resolve('uploads/testimonials');
@@ -36,6 +37,7 @@ const upload = multer({
 const schema = z.object({
   name: z.string().min(1),
   role: z.string().min(1),
+  email: z.string().email().optional(),
   content: z.string().min(10),
   rating: z.coerce.number().min(1).max(5)
 });
@@ -64,7 +66,16 @@ router.post('/', upload.single('image'), async (req: Request, res: Response) => 
       rating: parsed.data.rating,
       image: relPath
     });
-    res.json({ id: created.id });
+    // Queue testimonial notification (internal + optional user receipt if email provided)
+    queueEmail('testimonial', {
+      id: created.id,
+      name: parsed.data.name,
+      role: parsed.data.role,
+      rating: parsed.data.rating,
+      createdAt: new Date().toISOString(),
+      email: parsed.data.email
+    });
+    res.json({ id: created.id, emailQueued: true });
   } catch (e) {
     console.error('[testimonial-submit] failed', e);
     res.status(500).json({ error: 'persist_failed', message: (e as Error).message });

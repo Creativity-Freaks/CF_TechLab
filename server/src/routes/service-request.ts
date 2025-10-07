@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
+// Import with explicit .js for ESM after compilation
 import { saveRequest, listRequests } from '../store.js';
+import { queueEmail } from '../email.js';
 
 export const router = Router();
 
@@ -24,7 +26,19 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const data = { ...parsed.data, requested: parsed.data.requested || [] };
     const id = await saveRequest(data);
-    res.json({ id });
+    // Fire-and-forget email (don't block response on failure)
+    queueEmail('service-request', {
+      id,
+      name: data.name,
+      email: data.email,
+      requested: data.requested,
+      company: data.company,
+      meetingDate: data.meetingDate,
+      meetingTime: data.meetingTime,
+      message: data.message,
+      submittedAt: data.submittedAt
+    });
+    res.json({ id, emailQueued: true });
   } catch (e) {
     res.status(500).json({ error: 'persist_failed' });
   }
