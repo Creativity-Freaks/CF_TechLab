@@ -1,11 +1,5 @@
 # CF TechLab Profile
 
-This profile file captures narrative, brand, and strategic context separate from the engineering-focused README. Link this in marketing or investor decks without exposing all technical scaffolding.
-
----
-
-## 🚀 Identity
-
 **CF TechLab** is the technology & innovation division of Creativity Freaks Group—where imagination is engineered into AI tools, automation systems, immersive AR/VR layers, and smart creative software.
 
 > “CF TechLab bridges the gap between art and algorithms — making technology creative and creativity intelligent.”
@@ -118,6 +112,20 @@ Add channels (email / site / socials) as they formalize.
 - See `README.md` for technical implementation details.
 - See `CONTRIBUTING.md` for collaboration workflow.
 - See `LICENSE` for usage rights.
+
+---
+
+## 🛠 Technical Implementation (Snapshot)
+
+| Aspect | Current Choice |
+|--------|----------------|
+| Runtime | Static Vite build (React 18) |
+| Data Layer | Supabase Postgres + Storage (open dev policies) |
+| Notifications | Supabase Edge Function → Resend API |
+| Auth | (Planned) – Not yet enabled (RLS hardening pending) |
+| Deployment | Vercel (static) + Supabase project |
+
+This profile intentionally abstracts implementation; see `README.md` for engineering specifics and roadmap for upcoming security & feature additions.
 
 ---
 

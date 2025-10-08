@@ -1,6 +1,6 @@
 # Contributing to CF TechLab
 
-Thanks for your interest in contributing! This project powers a dynamic marketing + innovation platform (React + Express + Prisma). The guidelines below help keep quality, consistency, and forward compatibility.
+Thanks for your interest in contributing! The project now runs as a **frontend + Supabase (DB/Storage) + Edge Functions** stack (the previous custom Node / Express / Prisma backend was intentionally removed for a lean serverless architecture). These guidelines keep quality, security, and velocity high.
 
 ---
 
@@ -14,79 +14,82 @@ Thanks for your interest in contributing! This project powers a dynamic marketin
 
 ---
 
-## 🧱 Project Structure Overview
+## 🧱 Current Project Structure
 
 ```
 CF_TechLab/
-  src/                 # Frontend (React)
-  server/              # Backend (Express + Prisma)
-    prisma/schema.prisma
-    src/store.ts       # Data access + seeding
-    src/routes/        # API endpoints
-  uploads/             # Runtime file uploads (ignored in Git)
-  README.md            # Concise engineering overview
-  PROFILE.md           # Brand / mission / narrative content
-  CONTRIBUTING.md      # This file
-  LICENSE              # MIT license
+  src/
+    components/          # UI + sections + shadcn style primitives
+    hooks/               # React Query data & mutation hooks
+    lib/                 # supabase client, notify helper, utils
+    pages/               # Route-level pages (admin, marketing)
+  supabase/
+    functions/notify/    # Edge Function (email notifications via Resend)
+  scripts/               # Setup & maintenance scripts (notifications, RLS)
+  public/                # Static assets
+  .env.example           # Frontend environment template (VITE_*)
+  vercel.json            # Static SPA + fallback routing
+  README.md              # Technical & deployment overview
+  PROFILE.md             # Brand / mission / narrative context
+  CONTRIBUTING.md        # This file
+  LICENSE
 ```
+
+> Legacy `server/` backend removed. If you plan to reintroduce a custom API, propose architecture in an issue first.
 
 ---
 
-## 🛠 Dev Environment
+## 🛠 Dev Environment (Serverless Mode)
 
-Front-end:
+1. Copy env template & fill:
+  ```bash
+  cp .env.example .env.local
+  # Add VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
+  ```
+2. Install & run:
+  ```bash
+  npm install
+  npm run dev   # http://localhost:8080
+  ```
+3. (Optional) Serve Edge Function locally:
+  ```bash
+  supabase login
+  supabase link --project-ref <project-ref>
+  supabase functions serve --env-file .env.local
+  # POST → http://localhost:54321/functions/v1/notify
+  ```
+4. Deploy notification function:
+  ```bash
+  supabase functions deploy notify
+  ```
 
-```bash
-npm install
-npm run dev
-```
-
-Backend:
-
-```bash
-cd server
-npm install
-npm run dev
-```
-
-API served at :4000 (default) and proxied via Vite to :8080.
-
-Prisma:
-
-```bash
-cd server
-npx prisma migrate dev --name <migration>
-```
-
-Regenerate client if schema changed:
-
-```bash
-npx prisma generate
-```
+No local Prisma / migrations now; database schema managed directly in Supabase (SQL editor or migration scripts if introduced later).
 
 ---
 
-## ✨ Adding a New Data Model
+## ✨ Adding / Modifying Data (Supabase)
 
-1. Edit `server/prisma/schema.prisma` (add model block).
-2. Run a migration: `npx prisma migrate dev --name add_<model>`.
-3. Add store helpers in `server/src/store.ts`.
-4. Expose routes (create new file under `server/src/routes/` or extend `content.ts`).
-5. Update frontend hooks/components to consume the new API.
-6. Add brief docs to README or PROFILE if user-facing.
+1. Design table structure (naming: snake_case for columns, plural table names).
+2. Create / alter table via Supabase SQL editor (or propose migration script under `scripts/sql/` if we formalize migrations later).
+3. Update or add React Query hooks (`hooks/useData.ts`, `hooks/useMutations.ts`).
+4. Ensure frontend forms validate (Zod / manual checks) before inserts.
+5. If notifications required, include relevant `sendNotification({...})` call with clear `type` + `meta` payload.
+6. Update README sections or PROFILE if user‑facing feature.
+7. (Later) Add RLS policies—open a PR including the SQL.
 
 ---
 
-## 🧪 Testing & Validation (Manual for now)
+## 🧪 Testing & Validation (Current Manual Flow)
 
 Before opening a PR:
 
-- `npm run lint` (root) and `npx tsc --noEmit` (root + inside `server/` if needed)
-- Exercise new routes with `curl` or REST client.
-- Confirm no unhandled promise rejections in backend logs.
-- Upload workflow: confirm images appear under `/uploads/...` and accessible.
+- `npm run lint`
+- `npx tsc --noEmit`
+- Exercise new data flows (forms → Supabase rows) in the UI.
+- If Edge Function touched: deploy to a test project or serve locally & `curl` it.
+- Verify notifications appear (owner + optional user ack) or that failures are gracefully silent.
 
-(Planned) CI will enforce type, lint, and build. Feel free to add a GitHub Actions workflow; see “Potential Improvements”.
+> CI pipeline (lint + type + build + preview) is a roadmap item—feel free to contribute.
 
 ---
 
@@ -119,24 +122,21 @@ Before opening a PR:
 
 ---
 
-## 🗂 Backend Guidelines
+## 🗂 Supabase & Edge Function Guidelines
 
-- One responsibility per route module (e.g. `content.ts`, `testimonial-submit.ts`).
-- Only perform input validation with Zod schemas at the edge.
-- Map Prisma records to DTO shapes if filtering or transforming; return minimal fields.
-- Centralize repeated logic in `store.ts` (or split later into domain modules if it grows).
+- **Schema clarity**: Prefer explicit `created_at timestamptz default now()` columns.
+- **Minimal columns**: Add only fields used by UI or analytics—avoid premature generalization.
+- **RLS (future)**: Start locked-down → selectively open with policies. Document each policy rationale.
+- **Edge Function**: Keep Deno function small & single-purpose; log structured JSON for debugging.
+- **Secrets**: Never echo secrets in logs; validate presence early and return `501 Not configured` if missing.
 
 ---
 
-## 🧵 Error Handling
+## 🧵 Error Handling Philosophy
 
-Return JSON shape:
-
-```json
-{ "error": "slug", "message": "Optional human friendly context" }
-```
-
-Log internal details server-side (avoid leaking stack traces to client in production).
+- Frontend: show concise toast; avoid leaking raw Supabase error text unless helpful.
+- Edge Function: return `{ ok:false, error:"slug" }` (currently basic—enhancements welcome).
+- Do not rely on string matching Resend errors for logic; treat fail → warn + continue UX.
 
 ---
 
@@ -150,13 +150,15 @@ Log internal details server-side (avoid leaking stack traces to client in produc
 
 ## 🔮 Potential Improvements (Open to PRs)
 
-- Auth (API key or session) for admin routes
-- Switch from SQLite to Postgres for production readiness
-- Image optimization pipeline (sharp) + remote storage (S3/R2)
-- Logging (pino) + request tracing
-- Automated tests (Vitest for units, Playwright/Cypress for E2E)
-- CI pipeline (GitHub Actions) for build / lint / type / preview
-- Dark/light theme toggle tokens sync
+- RLS policy set + auth gated admin pages
+- Dark / light theme toggle + persisted preference
+- Rich HTML email templates (brand styling)
+- Alternate mail transport (Gmail App Password / Postmark fallback)
+- Rate limiting / hCaptcha for public forms
+- Basic analytics (page + conversion events)
+- CI workflow (GitHub Actions) with deploy previews
+- Vitest unit test scaffolding + Playwright smoke tests
+- Error monitoring integration (Sentry / Logflare)
 
 ---
 
@@ -175,4 +177,4 @@ Open an issue with:
 - Expected vs actual
 - Screenshots / logs (if visual or runtime issue)
 
-Enjoy building! ⚡
+Enjoy building in serverless mode! ⚡
