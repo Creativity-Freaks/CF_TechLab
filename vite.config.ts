@@ -14,4 +14,18 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Slightly bump warning limit; we also manually chunk large vendor sets
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split core React/runtime
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          // UI / data layer libs
+          "vendor-ui": ["@tanstack/react-query", "lucide-react", "recharts"],
+        }
+      }
+    }
+  }
 }));
