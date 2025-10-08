@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Code, Smartphone, Brain, Gamepad2, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { supabase } from '@/lib/supabase';
+import { useFeaturedProjects } from '@/hooks/useData';
 import type { LucideIcon } from "lucide-react";
 
 type Project = {
@@ -77,21 +79,17 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 export const Projects = () => {
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const featuredQuery = useFeaturedProjects(6);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch('/api/content/projects?limit=6');
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        const data = await res.json();
-        if (!cancelled) setProjects(data.items as Project[]);
-      } catch (_e) {
-        if (!cancelled) setError('Failed to load projects');
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+    if (featuredQuery.isSuccess) {
+      setProjects(featuredQuery.data);
+      setError(null);
+    }
+    if (featuredQuery.isError) {
+      setError('Failed to load projects');
+    }
+  }, [featuredQuery.isSuccess, featuredQuery.isError, featuredQuery.data]);
   return (
     <section id="projects" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
       {/* Background Effect */}

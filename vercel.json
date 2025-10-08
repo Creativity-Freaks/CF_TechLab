@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://YOUR-BACKEND-DOMAIN/api/$1" },
+    { "source": "/uploads/(.*)", "destination": "https://YOUR-BACKEND-DOMAIN/uploads/$1" }
+  ]
+}

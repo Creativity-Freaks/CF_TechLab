@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useApproveTestimonial, useDeleteTestimonial } from '@/hooks/useMutations';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -24,10 +26,23 @@ export default function AdminTestimonialsPage() {
   async function load() {
     setLoading(true); setError(null);
     try {
-      const res = await fetch('/api/content/testimonials/pending');
-      if (!res.ok) throw new Error('status_' + res.status);
-      const data = await res.json();
-      setItems(data.items || []);
+      if (!supabase) throw new Error('Supabase not configured');
+      const { data, error } = await supabase
+        .from('testimonials')
+        .select('id,name,role,image,content,rating,created_at')
+        .eq('approved', false)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      const mapped: PendingTestimonial[] = (data || []).map(r => ({
+        id: r.id,
+        name: r.name,
+        role: r.role,
+        image: r.image,
+        content: r.content,
+        rating: r.rating,
+        createdAt: r.created_at
+      }));
+      setItems(mapped);
     } catch (e) {
       setError('Failed to load pending testimonials');
     } finally {
@@ -37,35 +52,30 @@ export default function AdminTestimonialsPage() {
 
   useEffect(() => { load(); }, []);
 
+  const approveMutation = useApproveTestimonial();
+  const deleteMutation = useDeleteTestimonial();
+
   async function approve(id: string) {
     setActingId(id);
     try {
-      const res = await fetch(`/api/content/testimonials/${id}/approve`, { method: 'POST' });
-      if (!res.ok) throw new Error('Failed');
+      await approveMutation.mutateAsync(id);
       toast({ title: 'Approved', description: 'Testimonial approved' });
       setItems(prev => prev.filter(p => p.id !== id));
-      // Notify public components (e.g., Testimonials) to refresh
-      window.dispatchEvent(new CustomEvent('testimonial-submitted'));
-    } catch {
+    } catch (err) {
       toast({ title: 'Error', description: 'Approve failed' });
-    } finally {
-      setActingId(null);
-    }
+    } finally { setActingId(null); }
   }
 
   async function remove(id: string) {
     if (!confirm('Delete this testimonial?')) return;
     setActingId(id);
     try {
-      const res = await fetch(`/api/content/testimonials/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
+      await deleteMutation.mutateAsync(id);
       toast({ title: 'Deleted', description: 'Testimonial removed' });
       setItems(prev => prev.filter(p => p.id !== id));
-    } catch {
+    } catch (err) {
       toast({ title: 'Error', description: 'Delete failed' });
-    } finally {
-      setActingId(null);
-    }
+    } finally { setActingId(null); }
   }
 
   return (
@@ -91,8 +101,8 @@ export default function AdminTestimonialsPage() {
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">{t.content}</p>
               <div className="flex items-center gap-3 pt-2">
-                <Button size="sm" disabled={actingId === t.id} onClick={() => approve(t.id)} className="bg-green-600 hover:bg-green-700">{actingId === t.id ? 'Working...' : 'Approve'}</Button>
-                <Button size="sm" variant="destructive" disabled={actingId === t.id} onClick={() => remove(t.id)}>Delete</Button>
+                <Button size="sm" disabled={actingId === t.id || approveMutation.isPending} onClick={() => approve(t.id)} className="bg-green-600 hover:bg-green-700">{actingId === t.id && approveMutation.isPending ? 'Working...' : 'Approve'}</Button>
+                <Button size="sm" variant="destructive" disabled={actingId === t.id || deleteMutation.isPending} onClick={() => remove(t.id)}>{actingId === t.id && deleteMutation.isPending ? 'Working...' : 'Delete'}</Button>
               </div>
             </Card>
           ))}

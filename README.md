@@ -2,7 +2,7 @@
 
 # ⚡ CF TechLab
 
-Modern full‑stack marketing & innovation platform (React + Express + Prisma) with dynamic content, file uploads, testimonial moderation, and lightweight admin tooling.
+Modern frontend marketing & innovation site built with React, Vite, Tailwind, and TypeScript. (Backend layer temporarily removed; this repo now contains only the frontend implementation. Future backend/API work will be reintroduced later.)
 
 <br/>
 
@@ -40,62 +40,48 @@ Modern full‑stack marketing & innovation platform (React + Express + Prisma) w
 
 ## 1. Overview
 
-This repository contains both the frontend (Vite + React + Tailwind UI) and backend (Express + Prisma) powering dynamic marketing content: services, projects, testimonials (approval workflow), service requests, and contact messages.
-
-Deployment model:
-
-- Static frontend (Vercel / Netlify / Cloudflare Pages) + Node API runtime (Fly.io / Render / Railway / VPS)
-- Easy migration path from SQLite (dev) → Postgres (production)
+This repository currently contains ONLY the frontend (previous Express/Prisma backend was removed for later redevelopment). All dynamic data sections now assume static or placeholder data until an API is reattached.
 
 ---
 
-## 2. Key Features
+## 2. Current Frontend Features
 
-| Domain       | Capability                                                             |
-| ------------ | ---------------------------------------------------------------------- |
-| Projects     | Pagination, category & search filter, admin create (URL or file image) |
-| Services     | Auto-seeded & delivered dynamically (no hard-coded UI lists)           |
-| Testimonials | Public submission + moderation (approve/delete) before display         |
-| Uploads      | Multer disk storage; consistent relative path references               |
-| Metrics      | Real-time project count surfaced on About page                         |
-| Search       | In-memory fallback for SQLite (swap to DB full-text later)             |
-| Seeding      | Idempotent first-access seeding for services/projects/testimonials     |
+| Area         | Capability (Frontend Only Mode)                            |
+| ------------ | ---------------------------------------------------------- |
+| Landing UI   | Hero, Services, Projects showcase, FAQ, CTA, Contact       |
+| Components   | Reusable shadcn-style primitives (buttons, forms, dialogs) |
+| Styling      | Tailwind CSS with custom CSS vars & animation utilities    |
+| Routing      | React Router page structure                                |
+| Theming Base | Design tokens prepared for light/dark (future toggle)      |
 
-Planned: authentication/authorization, Postgres migration, image optimization/CDN, audit trails.
+Deferred (will return with backend phase): dynamic content CRUD, uploads, testimonial moderation, email notifications.
 
 ---
 
-## 3. Tech Stack
+## 3. Tech Stack (Active)
 
-| Area               | Tech                                                                        |
-| ------------------ | --------------------------------------------------------------------------- |
-| Frontend           | React 18, Vite, TypeScript, Tailwind, lucide-react, shadcn-style components |
-| Data fetching      | Native fetch (+ optional TanStack Query)                                    |
-| Backend            | Express (TypeScript) using `tsx` for watch mode                             |
-| ORM                | Prisma 5 (SQLite dev)                                                       |
-| Validation         | Zod schemas at route edge                                                   |
-| Uploads            | Multer (disk storage)                                                       |
-| Email (extensible) | Nodemailer (service request notifications)                                  |
+| Layer      | Tech                                              |
+| ---------- | ------------------------------------------------- |
+| Frontend   | React 18, Vite, TypeScript, Tailwind              |
+| UI Icons   | lucide-react                                      |
+| Components | Radix primitives + custom wrappers (shadcn style) |
+| Forms      | react-hook-form + zod (client validation)         |
+| State      | Local state (TanStack Query present, optional)    |
 
 ---
 
-## 4. Repository Structure
+## 4. Repository Structure (Frontend Only)
 
 CF_TechLab/
-src/ # Frontend React app
-components/ # UI + sections (Hero, Services, Testimonials, etc.)
-pages/ # Route-level pages (ProjectsPage, Admin pages, etc.)
-lib/ # Helpers (service request, utils)
-server/
-prisma/ # schema.prisma + migrations + dev.db
-src/
-store.ts # Data access + seeding functions
-routes/ # Express routers (content, testimonial-submit, etc.)
-uploads/ # Runtime uploaded images (git ignored except sample)
-PROFILE.md # Brand & mission narrative
-CONTRIBUTING.md # Contribution guidelines
+src/ # React application source
+components/ # UI + sections (Hero, Services, etc.)
+pages/ # Route-level pages
+lib/ # Frontend helpers (api, utils)
+public/ # Static assets
+README.md # This overview
+PROFILE.md # Brand / mission narrative
+CONTRIBUTING.md # Contributing guidelines (still references backend – will be revised later)
 LICENSE # MIT
-README.md # (This engineering overview)
 
 ````
 
@@ -110,188 +96,133 @@ npm install
 npm run dev   # http://localhost:8080
 ````
 
-### Backend (second terminal)
+Backend instructions removed (future phase will reintroduce). Any calls to `/api/*` should be stubbed or pointed to a future service.
+
+## Production Build & Deployment
+
+Deploy as a static frontend (Vercel / Netlify / Cloudflare Pages / S3+CloudFront). When backend work resumes, this section will expand with API integration notes.
+
+### 1. Build frontend
 
 ```bash
-cd server
 npm install
-npm run dev   # http://localhost:4000
+npm run build
 ```
 
-The Vite dev server proxies `/api/*` → backend (see `vite.config.ts`).
+Outputs `dist/` at repo root.
 
-### Environment (server/.env)
+Backend build step removed.
+
+### 3. Configure environment
+
+Copy `server/.env.example` → `server/.env` and set (example):
 
 ```env
 PORT=4000
-DATABASE_URL="file:./dev.db"
-MAX_IMAGE_MB=5
-# Optional email config if enabling notifications:
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=your_user
-SMTP_PASS=your_pass
-SMTP_SECURE=false
-MAIL_FROM="CF TechLab <no-reply@example.com>"
-# Email notification toggles
+DATABASE_URL="postgresql://user:pass@host:5432/dbname?schema=public"  # Use Postgres in prod
 ENABLE_EMAIL=true
-# Where internal notifications are delivered (defaults to MAIL_FROM when unset)
-NOTIFY_TO=owner@example.com
+SMTP_HOST=smtp.yourprovider.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=api@yourdomain
+SMTP_PASS=your_app_password
+MAIL_FROM="CF TechLab <no-reply@yourdomain>"
+NOTIFY_TO=ops@yourdomain
+DOMAIN=yourdomain
+SERVE_FRONTEND=true
+MAX_IMAGE_MB=5
 ```
 
-Optional root `.env` for deployment differences:
+#### Supabase (Postgres + Storage) Add-on
+
+If using Supabase instead of local SQLite:
 
 ```env
-VITE_API_BASE=https://api.example.com
+# Supabase Database & Storage
+DATABASE_URL="postgresql://<user>:<pass>@aws-<region>.pooler.supabase.com:6543/postgres"
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SERVICE_KEY=service_role_key_here   # NEVER expose to frontend
+SUPABASE_BUCKET=uploads                      # Create this bucket in Supabase Storage
+ADMIN_TOKEN=change-this-token                # Used for admin-protected routes (x-admin-token header)
 ```
 
----
+When Supabase env vars are present, file uploads go to Storage under `projects/` and `testimonials/` paths and the DB stores absolute public URLs.
 
-## 6. Environment
+Database migrations & server runtime omitted until backend reinstatement.
 
-See `.env` examples above. Do not commit real secrets. Consider using Doppler / 1Password / Vault in production.
+Visit: `http://<host>:4000/` (app) and `http://<host>:4000/api/health` (health).
 
-### Email Setup (Notifications)
+### 6. One-shot build script (optional)
 
-To enable email notifications for service requests, contact messages, and testimonials:
+Add to root `package.json`:
 
-1. Copy `server/.env.example` to `server/.env`.
-2. Provide valid SMTP credentials (Gmail App Password or Ethereal test account).
-3. Set `ENABLE_EMAIL=true`.
-4. Restart backend: inside `server/` run `npm run dev`.
-5. Test endpoints:
-   - `POST /api/contact`
-   - `POST /api/service-request`
-   - `POST /api/testimonial-submit` (optional `email` field for user receipt)
+```jsonc
+"scripts": { "build:all": "npm run build && cd server && npm run build" }
+```
 
-If `ENABLE_EMAIL` is false or SMTP variables missing, emails are skipped gracefully.
+Usage:
 
----
+```bash
+npm run build:all
+```
 
-## 7. Prisma & Data
+### 7. Reverse proxy (NGINX)
 
-Generate / migrate after schema changes:
+```nginx
+server {
+   listen 80;
+   server_name yourdomain;
+
+   location /api/ { proxy_pass http://127.0.0.1:4000/api/; proxy_set_header Host $host; }
+   location /uploads/ { proxy_pass http://127.0.0.1:4000/uploads/; }
+   location / { proxy_pass http://127.0.0.1:4000/; try_files $uri $uri/ /index.html; }
+}
+```
+
+### 8. Process manager (PM2)
 
 ```bash
 cd server
-npx prisma migrate dev --name add_feature
-npx prisma generate
-npx prisma studio  # DB UI (optional)
+pm2 start dist/index.js --name cf-techlab --env production
+pm2 save
 ```
 
-Seeding auto-runs lazily inside first content request via `ensureSeededContent()`.
+Systemd alternative (`/etc/systemd/system/cf-techlab.service`):
 
----
+```ini
+[Unit]
+Description=CF TechLab
+After=network.target
 
-## 8. API Summary
+[Service]
+Type=simple
+WorkingDirectory=/var/www/cf-techlab/server
+## 6. Development & Quality (Frontend Mode)
 
-| Method | Endpoint                                                         | Purpose                                   |
-| ------ | ---------------------------------------------------------------- | ----------------------------------------- |
-| GET    | `/api/content/services`                                          | List services                             |
-| GET    | `/api/content/projects?limit=6`                                  | Homepage limited projects                 |
-| GET    | `/api/content/projects?page=1&pageSize=9&search=ai&category=Web` | Paginated / filtered projects             |
-| POST   | `/api/content/projects`                                          | Create project (JSON or multipart)        |
-| GET    | `/api/content/testimonials?batch=1&size=3`                       | Batched approved testimonials             |
-| GET    | `/api/content/testimonials/pending`                              | Pending testimonials (admin)              |
-| POST   | `/api/content/testimonials/:id/approve`                          | Approve testimonial                       |
-| DELETE | `/api/content/testimonials/:id`                                  | Delete testimonial                        |
-| POST   | `/api/testimonial-submit`                                        | Public testimonial submission (multipart) |
-| POST   | `/api/service-request`                                           | Service inquiry capture                   |
-| POST   | `/api/contact`                                                   | Contact message (if route enabled)        |
-
-Example multipart project create:
-
-```bash
-curl -F title="AI Dashboard" \
-         -F category="Web" \
-         -F description="Real-time analytics" \
-         -F iconKey="Code" \
-         -F tags='["AI","Analytics"]' \
-         -F year=2025 \
-         -F projectUrl=https://example.com/demo \
-         -F imageFile=@/path/to/image.png \
-         http://localhost:4000/api/content/projects
-```
-
----
-
-## 9. Moderation Flow (Testimonials)
-
-1. User submits via `/api/testimonial-submit` (stored with `approved=false`).
-2. Admin panel (`/admin/testimonials`) fetches `/api/content/testimonials/pending`.
-3. Approve → now appears in public carousel (which only queries approved rows).
-
----
-
-## 10. Development & Quality
-
-- Type checking: `npx tsc --noEmit` (root & server)
+- Type checking: `npx tsc --noEmit`
 - Linting: `npm run lint`
-- Lightweight manual curl tests for API (recommend adding Jest/Vitest later)
-- In future: GitHub Actions for build + lint + type + (optional) preview deploy
+- Build: `npm run build`
+- Preview: `npm run preview`
 
----
+## 7. Roadmap (Next Steps After Re‑adding Backend)
 
-## 11. Customization Checklist
+| Phase | Planned Focus |
+| ----- | ------------- |
+| 1     | Reintroduce API (content, testimonials) |
+| 2     | Auth & protected admin UI |
+| 3     | File uploads (object storage) |
+| 4     | CI pipeline + basic tests |
 
-- [ ] Replace seed images / copy
-- [ ] Add auth middleware for admin endpoints
-- [ ] Move uploads to object storage (S3/R2) with signed URLs
-- [ ] Introduce Postgres for production scale
-- [ ] Add E2E tests (Playwright) & integration coverage
-- [ ] Add logging (pino) + request correlation IDs
-- [ ] Add image optimization (sharp) pipeline
-
----
-
-## 12. Security Notes
-
-Current admin endpoints are open (dev). Add at least:
-
-- API key header OR cookie session auth
-- Rate limiting (e.g., express-rate-limit)
-- Validation already handled via Zod
-
----
-
-## 13. Roadmap (Selected)
-
-| Phase   | Focus                                                  |
-| ------- | ------------------------------------------------------ |
-| Q4 2025 | Auth (API key / session) + secure admin endpoints      |
-| Q1 2026 | Postgres migration + search via ILIKE / trigram        |
-| Q2 2026 | Image optimization + remote object storage             |
-| 2026+   | Observability (metrics, structured logs), CI pipelines |
-
----
-
-## 14. License
+## 8. License
 
 MIT © 2025 CF TechLab — see `LICENSE`.
 
----
+## 9. Related Docs
 
-## 15. Contact & Support
-
-| Purpose           | Channel (placeholder)                |
-| ----------------- | ------------------------------------ |
-| General inquiries | hello@cftechlab.com                  |
-| Security          | security@cftechlab.com (planned)     |
-| Partnerships      | partnerships@cftechlab.com (planned) |
-
-> You can replace these with actual issue templates / discussion links.
-
----
-
-## 16. Related Docs
-
-- `PROFILE.md` – Mission, vision, narrative, branding
-- `CONTRIBUTING.md` – How to contribute / PR workflow
-
----
+- `PROFILE.md`
+- `CONTRIBUTING.md` (legacy backend references present)
 
 <div align="center">
-
-_Built with focus on performance, accessibility & creative engineering._ ⚡
-
+Focused frontend slice — backend coming soon. ⚡
 </div>
+```

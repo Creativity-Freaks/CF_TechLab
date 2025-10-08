@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { ExternalLink, Code, Smartphone, Brain, Gamepad2, Search, Filter } from "lucide-react";
 import Footer from "@/components/Footer";
 import { useEffect, useState } from "react";
+import { usePaginatedProjects } from '@/hooks/useData';
 import type { LucideIcon } from "lucide-react";
 
 type Project = {
@@ -30,34 +31,23 @@ export default function ProjectsPage() {
   const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const paginated = usePaginatedProjects({ page, pageSize, search, category });
   useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    (async () => {
-      setLoading(true);
+    if (paginated.isLoading) {
+      setLoading(true); setError(null);
+    } else {
+      setLoading(false);
+    }
+    if (paginated.isSuccess) {
+      setProjects(paginated.data.items);
+      setTotalPages(paginated.data.totalPages);
       setError(null);
-      try {
-        const qs = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
-        if (search.trim()) qs.set('search', search.trim());
-        if (category.trim()) qs.set('category', category.trim());
-        const res = await fetch(`/api/content/projects?${qs.toString()}`, { signal: controller.signal });
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        const data = await res.json();
-        if (!cancelled) {
-          setProjects(data.items as Project[]);
-          setTotalPages(data.totalPages || 1);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError('Failed to load projects');
-          setProjects(null);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; controller.abort(); };
-  }, [page, pageSize, search, category]);
+    }
+    if (paginated.isError) {
+      setError('Failed to load projects');
+      setProjects(null);
+    }
+  }, [paginated.isLoading, paginated.isSuccess, paginated.isError, paginated.data]);
   return (
     <div className="min-h-screen bg-background">
       <Header />

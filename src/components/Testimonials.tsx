@@ -1,6 +1,8 @@
 import { Star, Quote } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useEffect, useState, useCallback } from "react";
+import { supabase } from '@/lib/supabase';
+import { useTestimonials } from '@/hooks/useData';
 
 type Testimonial = {
   id: string;
@@ -14,34 +16,23 @@ type Testimonial = {
 export const Testimonials = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const testimonialsQuery = useTestimonials();
   const groupSize = 3; // number shown per slide
   const [autoIndex, setAutoIndex] = useState(0); // rotates through groups of 3
   // Fetch all testimonials by iterating batches sequentially.
-  const fetchAll = useCallback(async () => {
-    setError(null);
-    let batch = 1;
-    const collected: Testimonial[] = [];
-    const safetyMax = 100; // prevent infinite loop
-    try {
-      while (batch <= safetyMax) {
-        const res = await fetch(`/api/content/testimonials?batch=${batch}&size=${groupSize}`);
-        if (!res.ok) throw new Error('status_' + res.status);
-        const data = await res.json();
-        collected.push(...(data.items as Testimonial[]));
-        // Update incrementally so UI shows as soon as first batch arrives
-        setTestimonials([...collected]);
-        if (!data.hasMore) break;
-        batch++;
-      }
-      setAutoIndex(0);
-    } catch {
-      setError('Failed to load testimonials');
-    }
-  }, []);
+  const fetchAll = useCallback(() => { testimonialsQuery.refetch(); }, [testimonialsQuery]);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    if (testimonialsQuery.isSuccess) {
+      setTestimonials(testimonialsQuery.data);
+      setError(null);
+      setAutoIndex(0);
+    } else if (testimonialsQuery.isError) {
+      setError('Failed to load testimonials');
+    }
+  }, [testimonialsQuery.isSuccess, testimonialsQuery.isError, testimonialsQuery.data]);
 
   // Listen for new submissions and refresh first batch (replace existing) then reset rotation
   useEffect(() => {

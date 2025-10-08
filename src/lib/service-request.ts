@@ -1,6 +1,9 @@
 // Simulated service request API utility
 // Stores requests in localStorage under key 'submitted_service_requests'
 // In a real app replace with fetch('/api/service-request', { method: 'POST', body: JSON.stringify(payload) })
+// Integrated with unified Edge Function email notification via sendNotification()
+
+import { sendNotification } from './notify';
 
 export interface ServiceRequestPayload {
   name: string;
@@ -79,27 +82,21 @@ export async function submitServiceRequest(payload: ServiceRequestPayload): Prom
     receivedAt: new Date().toISOString(),
     estimateEta: eta.toISOString(),
   };
-  // fire-and-forget email notification hook (stub)
-  triggerEmailNotification({ id: response.id, email: payload.email, requested: payload.requested, name: payload.name }).catch(() => {});
-  return response;
-}
-
-// Stub email notification hook; replace with real integration (e.g., POST /api/notify or external service)
-export async function triggerEmailNotification(data: { id: string; email: string; requested: string[]; name: string }) {
-  try {
-  const base = (import.meta as ImportMeta).env?.VITE_API_BASE || '';
-    if (base) {
-      await fetch(`${base}/api/notify-service-request`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-    } else {
-      console.log('[email:stub]', data);
+  // Fire & forget email notification via Edge Function (service-request event)
+  sendNotification({
+    type: 'service-request',
+    id: response.id,
+    meta: {
+      email: payload.email,
+      name: payload.name,
+      company: payload.company,
+      meetingDate: payload.meetingDate,
+      meetingTime: payload.meetingTime,
+      requested: payload.requested.join(', '),
+      message: payload.message
     }
-  } catch {
-    // ignore
-  }
+  }).catch(() => {});
+  return response;
 }
 
 export function listServiceRequests(): ServiceRequestPayload[] {

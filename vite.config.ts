@@ -3,24 +3,12 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   server: {
     host: "::",
-    port: 8080,
-    proxy: {
-      // Proxy API calls in dev to backend (Node server on port 4000)
-      '/api': {
-        target: 'http://localhost:4000',
-        changeOrigin: true,
-      },
-      // Proxy uploaded images to backend so <img src="/uploads/..."> works in dev
-      '/uploads': {
-        target: 'http://localhost:4000',
-        changeOrigin: true,
-      }
-    }
+    port: 8080
   },
-  plugins: [react()].filter(Boolean),
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
+import { useCreateProject } from '@/hooks/useMutations';
 
 export default function AdminProjectsPage() {
   const [title, setTitle] = useState('');
@@ -19,39 +21,36 @@ export default function AdminProjectsPage() {
   const [projectUrl, setProjectUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const createProject = useCreateProject();
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title || !category || !description || (!image && !imageFile) || !tags || !year) {
+    if (!title || !category || !description || (!useUpload && !image) && !imageFile || !tags || !year) {
       toast({ title: 'Missing fields', description: 'Fill all required fields.' });
       return;
     }
+    if (!supabase) {
+      toast({ title: 'Error', description: 'Supabase not configured' });
+      return;
+    }
+    setSubmitting(true);
     try {
-      setSubmitting(true);
-      let res: Response;
-      if (useUpload && imageFile) {
-        const form = new FormData();
-        form.append('title', title);
-        form.append('category', category);
-        form.append('description', description);
-        form.append('iconKey', iconKey);
-        form.append('tags', tags);
-        form.append('year', year);
-        if (projectUrl) form.append('projectUrl', projectUrl);
-        form.append('imageFile', imageFile);
-        res = await fetch('/api/content/projects', { method: 'POST', body: form });
-      } else {
-        const payload = { title, category, description, image, iconKey, tags: tags.split(',').map(t=>t.trim()).filter(Boolean), year, projectUrl: projectUrl || undefined };
-        res = await fetch('/api/content/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      }
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err || 'Failed');
-      }
-      const data = await res.json();
-      toast({ title: 'Project added', description: `ID: ${data.id}` });
+      const tagArr = tags.split(',').map(t => t.trim()).filter(Boolean);
+      const id = await createProject.mutateAsync({
+        title,
+        category,
+        description,
+        iconKey,
+        tags: tagArr,
+        year,
+        projectUrl: projectUrl || null,
+        imageFile: useUpload ? imageFile : null,
+        imageUrl: !useUpload ? image : null,
+      });
+      toast({ title: 'Project added', description: `ID: ${id}` });
       setTitle(''); setCategory(''); setDescription(''); setImage(''); setImageFile(null); setTags(''); setProjectUrl('');
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Unexpected error';
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unexpected error';
       toast({ title: 'Error', description: msg });
     } finally {
       setSubmitting(false);
@@ -117,7 +116,7 @@ export default function AdminProjectsPage() {
             <label className="block text-sm font-medium mb-1">Project URL (optional)</label>
             <Input value={projectUrl} onChange={e=>setProjectUrl(e.target.value)} placeholder="https://example.com/project" />
           </div>
-          <Button type="submit" disabled={submitting} className="gap-2">{submitting ? 'Submitting...' : 'Add Project'}</Button>
+          <Button type="submit" disabled={submitting || createProject.isPending} className="gap-2">{(submitting || createProject.isPending) ? 'Submitting...' : 'Add Project'}</Button>
         </form>
       </main>
       <Footer />

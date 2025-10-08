@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
+import { supabase } from '@/lib/supabase';
+import { useSubmitContactMessage } from '@/hooks/useMutations';
 
 interface FormState {
   name: string;
@@ -32,24 +34,26 @@ export const Contact = () => {
     return null;
   }
 
+  const submitContact = useSubmitContactMessage();
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setSuccessId(null);
     const v = validate(form);
     if (v) { setError(v); return; }
+    if (!supabase) { setError('Supabase not configured'); return; }
     setSubmitting(true);
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+      const id = await submitContact.mutateAsync({
+        name: form.name,
+        email: form.email,
+        subject: form.subject,
+        message: form.message
       });
-      if (!res.ok) throw new Error(`Status ${res.status}`);
-      const data = await res.json();
-      setSuccessId(data.id);
+      setSuccessId(id);
       setForm(initialState);
-    } catch (_e) {
+    } catch (err) {
       setError('Failed to send message. Please try again.');
     } finally {
       setSubmitting(false);
@@ -101,8 +105,8 @@ export const Contact = () => {
                 <label htmlFor="message" className="block text-sm font-medium mb-2">Message</label>
                 <Textarea id="message" value={form.message} onChange={handleChange} placeholder="Tell us about your project..." rows={5} className="transition-all focus:border-primary" />
               </div>
-              <Button type="submit" disabled={submitting} variant="hero" size="lg" className="w-full group disabled:opacity-70">
-                {submitting ? 'Sending...' : 'Send Message'}
+              <Button type="submit" disabled={submitting || submitContact.isPending} variant="hero" size="lg" className="w-full group disabled:opacity-70">
+                {(submitting || submitContact.isPending) ? 'Sending...' : 'Send Message'}
                 <Mail className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
               </Button>
             </form>

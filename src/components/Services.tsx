@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Smartphone, Glasses, Cpu, Wand2, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { supabase } from '@/lib/supabase';
+import { useServices } from '@/hooks/useData';
 
 type Service = {
   id: string;
@@ -39,9 +41,10 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
 }
 
 export const Services = () => {
-  const [services, setServices] = useState<Service[] | null>(null);
+  const [services, setServices] = useState<Service[] | null>(null); // keep local for fallback merging
   const [error, setError] = useState<string | null>(null);
   const [offlineFallback, setOfflineFallback] = useState(false);
+  const servicesQuery = useServices();
 
   // Local fallback (mirrors server seed so UI still works if API down)
   const fallbackServices: Service[] = useMemo(() => [
@@ -56,24 +59,48 @@ export const Services = () => {
     setError(null);
     setOfflineFallback(false);
     setServices(null);
-    try {
-      const res = await fetch(`/api/content/services`, { signal: AbortSignal.timeout ? AbortSignal.timeout(7000) : undefined });
-      if (!res.ok) throw new Error(`Status ${res.status}`);
-      const data = await res.json();
-      setServices(data.items as Service[]);
-    } catch (e) {
-      // Use fallback so page doesn\'t look broken
+    // If supabase not configured -> fallback
+    if (!supabase) {
       setServices(fallbackServices);
       setOfflineFallback(true);
-      setError('Live services API unavailable. Showing fallback.');
+      setError('Supabase not configured. Showing fallback.');
+      return;
+    }
+    try {
+      const { data, error: sbError } = await supabase
+        .from('services')
+        .select('id,title,description,icon_key,gradient')
+        .order('created_at', { ascending: true });
+      if (sbError) throw sbError;
+      const mapped: Service[] = (data || []).map(r => ({
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        iconKey: r.icon_key,
+        gradient: r.gradient || 'from-primary to-primary-glow'
+      }));
+      setServices(mapped);
+    } catch (e) {
+      setServices(fallbackServices);
+      setOfflineFallback(true);
+      setError('Failed to load services. Showing fallback.');
     }
   }, [fallbackServices]);
 
   useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+    if (servicesQuery.isSuccess) {
+      setServices(servicesQuery.data);
+      setError(null);
+      setOfflineFallback(false);
+    }
+    if (servicesQuery.isError) {
+      setServices(fallbackServices);
+      setError('Failed to load services. Showing fallback.');
+      setOfflineFallback(true);
+    }
+  }, [servicesQuery.isSuccess, servicesQuery.isError, servicesQuery.data, fallbackServices]);
 
-  const retry = () => fetchServices();
+  const retry = () => servicesQuery.refetch();
 
   return (
     <section id="services" className="py-16 sm:py-20 md:py-24 relative overflow-hidden">
@@ -111,7 +138,7 @@ export const Services = () => {
             </Button>
           </div>
         )}
-        {!services && !error && (
+  {!services && !error && servicesQuery.isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="h-48 rounded-lg animate-pulse bg-muted/30" />

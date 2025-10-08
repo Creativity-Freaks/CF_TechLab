@@ -25,3 +25,10 @@ dist-ssr
 
 # Environment
 server/.env
+.env.local
+.env
+
+# Supabase local config state
+supabase/.temp
+supabase/.branches
+supabase/.kps

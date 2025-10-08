@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { Lightbulb, Users, Rocket, Award, Target, Zap } from "lucide-react";
 import Footer from "@/components/Footer";
 import { useEffect, useState } from "react";
+import { supabase } from '@/lib/supabase';
 
 const values = [
   {
@@ -41,13 +42,12 @@ export default function AboutPage() {
       try {
         setLoadingProjects(true);
         setProjectError(null);
-        // Fetch minimal page to get total count
-        const res = await fetch('/api/content/projects?page=1&pageSize=1');
-        if (!res.ok) throw new Error('status_' + res.status);
-        const data = await res.json();
-        if (!cancelled && typeof data.total === 'number') {
-          setProjectCount(data.total);
-        }
+        if (!supabase) throw new Error('not_configured');
+        const { count, error } = await supabase
+          .from('projects')
+          .select('id', { count: 'exact', head: true });
+        if (error) throw error;
+        if (!cancelled && typeof count === 'number') setProjectCount(count);
       } catch (e) {
         if (!cancelled) setProjectError('Could not load');
       } finally {

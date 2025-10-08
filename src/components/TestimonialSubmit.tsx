@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Star, Upload } from 'lucide-react';
+import { useSubmitTestimonial } from '@/hooks/useMutations';
 
 interface FormState {
   name: string;
@@ -27,43 +29,31 @@ export function TestimonialSubmit() {
     setForm(f => ({ ...f, [key]: value }));
   }
 
+  const submitTestimonial = useSubmitTestimonial();
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null); setSuccess(null);
     if (!form.name.trim()) return setError('Name required');
     if (!form.role.trim()) return setError('Role required');
-  if (form.content.trim().length < 10) return setError('Content must be at least 10 chars');
-  if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) return setError('Invalid email');
+    if (form.content.trim().length < 10) return setError('Content must be at least 10 chars');
+    if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) return setError('Invalid email');
     if (!form.imageFile) return setError('Image required');
-    const fd = new FormData();
-    fd.append('name', form.name);
-    fd.append('role', form.role);
-  fd.append('content', form.content);
-  if (form.email) fd.append('email', form.email);
-    fd.append('rating', String(form.rating));
-    fd.append('image', form.imageFile);
+    if (!supabase) return setError('Supabase not configured.');
     setSubmitting(true);
     try {
-      const res = await fetch('/api/testimonial-submit', { method: 'POST', body: fd });
-      let data: unknown = null;
-      try { data = await res.json(); } catch (_) { /* ignore parse errors */ }
-      const obj = (data && typeof data === 'object') ? data as Record<string, unknown> : null;
-      if (!res.ok) {
-        // Prefer specific server provided error/message
-        const serverMsg = obj && (typeof obj.message === 'string' ? obj.message : (typeof obj.error === 'string' ? obj.error : undefined));
-        setError(serverMsg ? `Submission failed: ${serverMsg}` : 'Submission failed.');
-        return;
-      }
-      if (obj && typeof obj.id === 'string') {
-        setSuccess(obj.id);
-        setForm(initial);
-        // Dispatch global event so testimonial list can refresh immediately
-        window.dispatchEvent(new CustomEvent('testimonial-submitted', { detail: { id: obj.id } }));
-      } else {
-        setError('Unexpected response from server.');
-      }
-    } catch (e) {
-      setError((e as Error).message || 'Submission failed.');
+      const id = await submitTestimonial.mutateAsync({
+        name: form.name,
+        role: form.role,
+        content: form.content,
+        rating: form.rating,
+        imageFile: form.imageFile,
+        email: form.email || undefined
+      });
+      setSuccess(id);
+      setForm(initial);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Submission failed');
     } finally {
       setSubmitting(false);
     }
@@ -135,7 +125,7 @@ export function TestimonialSubmit() {
                 </div>
               )}
             </div>
-            <Button disabled={submitting} type="submit" className="gap-2">{submitting ? 'Submitting...' : 'Submit Testimonial'}<Upload className="w-4 h-4" /></Button>
+            <Button disabled={submitting || submitTestimonial.isPending} type="submit" className="gap-2">{(submitting || submitTestimonial.isPending) ? 'Submitting...' : 'Submit Testimonial'}<Upload className="w-4 h-4" /></Button>
           </form>
         </Card>
       </div>
