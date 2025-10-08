@@ -3,9 +3,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "cleanUrls": true,
   "routes": [
-    { "handle": "filesystem" },
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/cftech.png", "dest": "/cftech.png" },
+    { "src": "/placeholder.svg", "dest": "/placeholder.svg" },
+    { "src": "/favicon.ico", "dest": "/favicon.ico" },
     { "src": "/.*", "dest": "/index.html" }
   ]
 }
