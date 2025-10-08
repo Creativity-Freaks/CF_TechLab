@@ -117,13 +117,13 @@ Add channels (email / site / socials) as they formalize.
 
 ## 🛠 Technical Implementation (Snapshot)
 
-| Aspect | Current Choice |
-|--------|----------------|
-| Runtime | Static Vite build (React 18) |
-| Data Layer | Supabase Postgres + Storage (open dev policies) |
-| Notifications | Supabase Edge Function → Resend API |
-| Auth | (Planned) – Not yet enabled (RLS hardening pending) |
-| Deployment | Vercel (static) + Supabase project |
+| Aspect        | Current Choice                                      |
+| ------------- | --------------------------------------------------- |
+| Runtime       | Static Vite build (React 18)                        |
+| Data Layer    | Supabase Postgres + Storage (open dev policies)     |
+| Notifications | Supabase Edge Function → Resend API                 |
+| Auth          | (Planned) – Not yet enabled (RLS hardening pending) |
+| Deployment    | Vercel (static) + Supabase project                  |
 
 This profile intentionally abstracts implementation; see `README.md` for engineering specifics and roadmap for upcoming security & feature additions.
 

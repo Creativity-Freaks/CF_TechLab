@@ -42,26 +42,33 @@ CF_TechLab/
 ## 🛠 Dev Environment (Serverless Mode)
 
 1. Copy env template & fill:
-  ```bash
-  cp .env.example .env.local
-  # Add VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
-  ```
+
+```bash
+cp .env.example .env.local
+# Add VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
+```
+
 2. Install & run:
-  ```bash
-  npm install
-  npm run dev   # http://localhost:8080
-  ```
+
+```bash
+npm install
+npm run dev   # http://localhost:8080
+```
+
 3. (Optional) Serve Edge Function locally:
-  ```bash
-  supabase login
-  supabase link --project-ref <project-ref>
-  supabase functions serve --env-file .env.local
-  # POST → http://localhost:54321/functions/v1/notify
-  ```
+
+```bash
+supabase login
+supabase link --project-ref <project-ref>
+supabase functions serve --env-file .env.local
+# POST → http://localhost:54321/functions/v1/notify
+```
+
 4. Deploy notification function:
-  ```bash
-  supabase functions deploy notify
-  ```
+
+```bash
+supabase functions deploy notify
+```
 
 No local Prisma / migrations now; database schema managed directly in Supabase (SQL editor or migration scripts if introduced later).
 

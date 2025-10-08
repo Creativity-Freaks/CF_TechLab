@@ -63,16 +63,16 @@ CF TechLab is a lean, fast-loading marketing & product showcase platform for AI,
 
 ## 🚀 Core Features (Current)
 
-| Area | Capability |
-|------|------------|
-| Landing & Sections | Hero, Services, Projects, Testimonials, FAQ, CTA, Contact |
-| Dynamic Data | Services, Projects, Testimonials, Contact Messages stored in Supabase tables |
-| Media | Public object storage (bucket `uploads`) for project & testimonial images |
-| Forms | Contact, Testimonial submission, Service Request (simulated local fallback) |
-| Admin Pages | Add Project, Moderate Testimonials (approve / delete) |
-| Notifications | Edge Function `notify` triggers owner + (optional) user acknowledgment email via Resend |
-| React Query | Unified data & mutation layer (`hooks/useData.ts`, `hooks/useMutations.ts`) |
-| Theming Surface | Tailwind design tokens & gradients ready for dark/light extension |
+| Area               | Capability                                                                              |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Landing & Sections | Hero, Services, Projects, Testimonials, FAQ, CTA, Contact                               |
+| Dynamic Data       | Services, Projects, Testimonials, Contact Messages stored in Supabase tables            |
+| Media              | Public object storage (bucket `uploads`) for project & testimonial images               |
+| Forms              | Contact, Testimonial submission, Service Request (simulated local fallback)             |
+| Admin Pages        | Add Project, Moderate Testimonials (approve / delete)                                   |
+| Notifications      | Edge Function `notify` triggers owner + (optional) user acknowledgment email via Resend |
+| React Query        | Unified data & mutation layer (`hooks/useData.ts`, `hooks/useMutations.ts`)             |
+| Theming Surface    | Tailwind design tokens & gradients ready for dark/light extension                       |
 
 Planned next (see Roadmap): Auth, granular RLS, richer email templates, rate limiting, analytics.
 
@@ -108,13 +108,13 @@ Planned next (see Roadmap): Auth, granular RLS, richer email templates, rate lim
 
 ## 🎨 Design Principles
 
-| Principle | Why It Matters | Practical Expression |
-|-----------|----------------|----------------------|
-| Lean First | Faster iteration, fewer moving parts | Removed legacy server, single function for mail |
-| Progressive Hardening | Ship value early, secure steadily | Open RLS in dev → planned policy set |
-| User Feedback Loops | Instant acknowledgement builds trust | Dual owner + user email (where allowed) |
-| Declarative Data | Clarity + maintainability | React Query + typed hooks in `hooks/` |
-| Visual Narrative | Brand consistency & energy | Gradient layers, animated cards, iconography |
+| Principle             | Why It Matters                       | Practical Expression                            |
+| --------------------- | ------------------------------------ | ----------------------------------------------- |
+| Lean First            | Faster iteration, fewer moving parts | Removed legacy server, single function for mail |
+| Progressive Hardening | Ship value early, secure steadily    | Open RLS in dev → planned policy set            |
+| User Feedback Loops   | Instant acknowledgement builds trust | Dual owner + user email (where allowed)         |
+| Declarative Data      | Clarity + maintainability            | React Query + typed hooks in `hooks/`           |
+| Visual Narrative      | Brand consistency & energy           | Gradient layers, animated cards, iconography    |
 
 ---
 
@@ -122,13 +122,13 @@ Planned next (see Roadmap): Auth, granular RLS, richer email templates, rate lim
 
 ## 🛠 Tech Stack
 
-| Layer | Tech |
-|-------|------|
-| UI | React 18, TypeScript, Tailwind CSS, Radix Primitives (shadcn‑style) |
-| State/Data | TanStack React Query 5 |
-| Backend as a Service | Supabase (Postgres + Storage + Edge Functions) |
-| Notifications | Resend (via Edge Function) – pluggable design |
-| Tooling | Vite, ESLint, SWC, Scripts (bash) |
+| Layer                | Tech                                                                |
+| -------------------- | ------------------------------------------------------------------- |
+| UI                   | React 18, TypeScript, Tailwind CSS, Radix Primitives (shadcn‑style) |
+| State/Data           | TanStack React Query 5                                              |
+| Backend as a Service | Supabase (Postgres + Storage + Edge Functions)                      |
+| Notifications        | Resend (via Edge Function) – pluggable design                       |
+| Tooling              | Vite, ESLint, SWC, Scripts (bash)                                   |
 
 ---
 
@@ -214,17 +214,17 @@ npm run preview
 3. Add frontend env vars (the `VITE_*` ones) in Vercel dashboard.
 4. Deploy – static output served from `dist/` (configured via `vercel.json`).
 5. Deploy Edge Function:
-	 ```bash
-	 supabase functions deploy notify
-	 ```
+   ```bash
+   supabase functions deploy notify
+   ```
 6. Set secrets (see earlier section) & test:
-	 ```bash
-	 curl -s -X POST \
-		 -H "Content-Type: application/json" \
-		 -H "Authorization: Bearer $VITE_SUPABASE_ANON_KEY" \
-		 https://<project-ref>.functions.supabase.co/notify \
-		 -d '{"type":"contact","id":"test","meta":{"name":"Demo","email":"demo@example.com"}}'
-	 ```
+   ```bash
+   curl -s -X POST \
+   	 -H "Content-Type: application/json" \
+   	 -H "Authorization: Bearer $VITE_SUPABASE_ANON_KEY" \
+   	 https://<project-ref>.functions.supabase.co/notify \
+   	 -d '{"type":"contact","id":"test","meta":{"name":"Demo","email":"demo@example.com"}}'
+   ```
 
 SPA fallback is handled by `vercel.json` routes – no custom server needed.
 
@@ -260,6 +260,7 @@ Current dev configuration is permissive for velocity:
 - NEVER expose `service_role` key to the browser.
 
 Recommended hardening tasks:
+
 1. Re-enable RLS on all tables.
 2. Create separate table or flag for admin users (Supabase auth).
 3. Add rate limiting (Edge Function) for contact/testimonial spam.
@@ -270,14 +271,14 @@ Recommended hardening tasks:
 
 ## 🧪 Quality & Tooling
 
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Start Vite dev server |
-| `npm run build` | Production build (outputs `dist/`) |
-| `npm run preview` | Preview built assets |
-| `npm run lint` | ESLint code quality check |
-| `supabase functions deploy notify` | Deploy email function |
-| `./scripts/supabase-setup-notify.sh` | Automate secrets + deploy + test |
+| Command                              | Purpose                            |
+| ------------------------------------ | ---------------------------------- |
+| `npm run dev`                        | Start Vite dev server              |
+| `npm run build`                      | Production build (outputs `dist/`) |
+| `npm run preview`                    | Preview built assets               |
+| `npm run lint`                       | ESLint code quality check          |
+| `supabase functions deploy notify`   | Deploy email function              |
+| `./scripts/supabase-setup-notify.sh` | Automate secrets + deploy + test   |
 
 Add tests (Jest / Vitest) in future milestone.
 
@@ -289,13 +290,13 @@ Add tests (Jest / Vitest) in future milestone.
 
 ## 🎨 Brand Palette
 
-| Color | Hex | Usage |
-|-------|-----|-------|
-| Neon Green | `#00FF99` | Accent energy / highlights |
-| Rebel Red | `#FF2E63` | Callouts / emphasis |
-| Deep Black | `#1A1A1A` | Base canvas |
-| Pure White | `#FFFFFF` | Contrast / typography |
-| Soft Glow | `rgba(0,255,153,0.12)` | Background aura |
+| Color      | Hex                    | Usage                      |
+| ---------- | ---------------------- | -------------------------- |
+| Neon Green | `#00FF99`              | Accent energy / highlights |
+| Rebel Red  | `#FF2E63`              | Callouts / emphasis        |
+| Deep Black | `#1A1A1A`              | Base canvas                |
+| Pure White | `#FFFFFF`              | Contrast / typography      |
+| Soft Glow  | `rgba(0,255,153,0.12)` | Background aura            |
 
 <p>
 <span style="background:#00FF99;padding:4px 10px;border-radius:4px;font-size:12px;">#00FF99</span>
@@ -304,24 +305,24 @@ Add tests (Jest / Vitest) in future milestone.
 <span style="background:#FFFFFF;padding:4px 10px;border:1px solid #ddd;border-radius:4px;font-size:12px;">#FFFFFF</span>
 </p>
 
-| Script | Description |
-|--------|-------------|
-| `scripts/supabase-setup-notify.sh` | Non‑interactive secrets + deploy + test call |
-| `scripts/setup-notifications.md` | Narrative setup guide |
+| Script                                  | Description                                                |
+| --------------------------------------- | ---------------------------------------------------------- |
+| `scripts/supabase-setup-notify.sh`      | Non‑interactive secrets + deploy + test call               |
+| `scripts/setup-notifications.md`        | Narrative setup guide                                      |
 | `scripts/drop-all-rls-and-policies.sql` | Dev-only: drops policies & opens data (DO NOT use in prod) |
 
 ---
 
 ## 🗺 Roadmap
 
-| Phase | Focus |
-|-------|-------|
-| 1 | Implement proper RLS policies & auth guard for admin pages |
-| 2 | Rich email templates + Gmail/SMTP fallback + analytics events |
-| 3 | Rate limit + CAPTCHA / hCaptcha integration on public forms |
-| 4 | CI pipeline (lint, type check, deploy preview) |
-| 5 | Content editor / minimal CMS UI |
-| 6 | Observability (error tracking, performance metrics) |
+| Phase | Focus                                                         |
+| ----- | ------------------------------------------------------------- |
+| 1     | Implement proper RLS policies & auth guard for admin pages    |
+| 2     | Rich email templates + Gmail/SMTP fallback + analytics events |
+| 3     | Rate limit + CAPTCHA / hCaptcha integration on public forms   |
+| 4     | CI pipeline (lint, type check, deploy preview)                |
+| 5     | Content editor / minimal CMS UI                               |
+| 6     | Observability (error tracking, performance metrics)           |
 
 ---
 
@@ -330,6 +331,7 @@ Add tests (Jest / Vitest) in future milestone.
 Contributions welcome! Until auth & RLS are reinstated, most work will focus on frontend polish + security hardening. Open an issue describing the enhancement before submitting a PR.
 
 Guidelines:
+
 1. Fork → branch (`feat/<short-description>`)
 2. Keep changes scoped & atomic
 3. Run lint + build before PR
@@ -363,4 +365,3 @@ Made with ⚡, TypeScript & curiosity.
 `build fast` · `learn faster` · `secure next`
 
 </div>
-
