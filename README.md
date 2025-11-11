@@ -33,6 +33,8 @@
 
 - [✨ Vision](#-vision)
 - [🚀 Core Features](#-core-features-current)
+- [🚀 Core Features](#-core-features-current)
+- [🤖 Chatbot](#-chatbot)
 - [🧱 Architecture Snapshot](#-architecture-snapshot)
 - [🎨 Design Principles](#-design-principles)
 - [🛠 Tech Stack](#-tech-stack)
@@ -69,6 +71,7 @@ CF TechLab is a lean, fast-loading marketing & product showcase platform for AI,
 | Dynamic Data       | Services, Projects, Testimonials, Contact Messages stored in Supabase tables            |
 | Media              | Public object storage (bucket `uploads`) for project & testimonial images               |
 | Forms              | Contact, Testimonial submission, Service Request (simulated local fallback)             |
+| Chatbot            | Floating AI assistant (BN/EN) with service-request quick action                         |
 | Admin Pages        | Add Project, Moderate Testimonials (approve / delete)                                   |
 | Notifications      | Edge Function `notify` triggers owner + (optional) user acknowledgment email via Resend |
 | React Query        | Unified data & mutation layer (`hooks/useData.ts`, `hooks/useMutations.ts`)             |
@@ -161,6 +164,9 @@ VITE_SUPABASE_ANON_KEY=<public-anon-key>
 VITE_SUPABASE_BUCKET=uploads
 VITE_NOTIFICATIONS_ENABLED=true
 VITE_SIMULATE_SERVICE_REQUESTS=true
+# Chatbot
+# Server-side only (set in Vercel project settings)
+OPENAI_API_KEY=sk-...
 ```
 
 Edge Function & secrets (set via CLI, NOT in `.env.local`):
@@ -212,6 +218,7 @@ npm run preview
 1. Push repo to GitHub.
 2. Create Vercel project → Framework: Vite.
 3. Add frontend env vars (the `VITE_*` ones) in Vercel dashboard.
+   - Also add `OPENAI_API_KEY` (Environment Variable) – used by `/api/chat` serverless function.
 4. Deploy – static output served from `dist/` (configured via `vercel.json`).
 5. Deploy Edge Function:
    ```bash
@@ -227,6 +234,23 @@ npm run preview
    ```
 
 SPA fallback is handled by `vercel.json` routes – no custom server needed.
+
+---
+
+## 🤖 Chatbot
+
+The chatbot appears as a floating button on every page. It talks to a serverless endpoint at `/api/chat` which calls an LLM and returns a concise reply. When the user shows purchase/quote/meeting intent, the bot suggests a one-click service request form (uses existing `submitServiceRequest`).
+
+Local development options:
+
+- Use `vercel dev` to run both the Vite app and serverless function locally so `/api/chat` is available.
+- Without `vercel dev`, the chat call will fail locally (key is server-side only) but the rest of the site works.
+
+Production:
+
+- Set `OPENAI_API_KEY` in Vercel → Project → Settings → Environment Variables.
+- Also set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (server side only) so sessions + messages can be logged. Never expose service role key to client.
+- No key is exposed to the browser; all calls are server-to-server.
 
 ---
 

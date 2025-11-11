@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+// NOTE: Deno Edge runtime file – using ts-nocheck to avoid Node type noise during repo linting.
 // Edge Function: notify (with explicit CORS handling)
 // Sends email notifications for contact, testimonial, project events via Resend API
 // Deploy: supabase functions deploy notify
 // Set secrets: supabase secrets set RESEND_API_KEY=xxx NOTIFY_FROM=from@example.com NOTIFY_TO=owner@example.com
 
-interface EventBody { type: 'contact' | 'testimonial' | 'project' | 'service-request'; id: string; meta?: Record<string, unknown>; }
+interface EventBody { type: 'contact' | 'testimonial' | 'project' | 'service-request' | 'chat'; id: string; meta?: Record<string, unknown>; }
 
 // Basic CORS headers so browser (localhost dev) can call this function directly
 const corsHeaders: Record<string,string> = {
@@ -33,7 +35,7 @@ Deno.serve(async (req) => {
   let body: EventBody;
   try { body = await req.json(); } catch { return new Response('Bad JSON', { status: 400, headers: corsHeaders }); }
   if (!body?.type || !body?.id) return new Response('Missing fields', { status: 400, headers: corsHeaders });
-  try { console.log('[notify] incoming', { type: body.type, id: body.id }); } catch {}
+  try { console.log('[notify] incoming', { type: body.type, id: body.id }); } catch (_e) { /* ignore logging errors */ }
 
   const apiKey = Deno.env.get('RESEND_API_KEY');
   const from = Deno.env.get('NOTIFY_FROM') || 'no-reply@example.com';
@@ -48,7 +50,8 @@ Deno.serve(async (req) => {
     contact: `New contact message (${body.id})`,
     testimonial: `New testimonial submitted (${body.id})`,
     project: `New project created (${body.id})`,
-    'service-request': `New service request (${body.id})`
+    'service-request': `New service request (${body.id})`,
+    chat: `New chat activity (${body.id})`
   };
 
   const ownerHtml = `<h2>${subjectMap[body.type] || 'New Event'}</h2><pre>${JSON.stringify(body.meta || {}, null, 2)}</pre>`;

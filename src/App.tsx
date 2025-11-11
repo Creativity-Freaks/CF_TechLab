@@ -10,8 +10,10 @@ import ServicesPage from "./pages/ServicesPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import AdminProjectsPage from "./pages/AdminProjectsPage";
 import AdminTestimonialsPage from "./pages/AdminTestimonialsPage";
+import AdminChatsPage from "./pages/AdminChatsPage";
 import ContactPage from "./pages/ContactPage";
 import TestimonialSubmitPage from "./pages/TestimonialSubmitPage.tsx";
+import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <Chatbot />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -28,6 +31,7 @@ const App = () => (
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/admin/projects" element={<AdminProjectsPage />} />
           <Route path="/admin/testimonials" element={<AdminTestimonialsPage />} />
+          <Route path="/admin/chats" element={<AdminChatsPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/submit-testimonial" element={<TestimonialSubmitPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
