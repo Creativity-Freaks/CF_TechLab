@@ -39,7 +39,12 @@ export default function Chatbot() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: next, sessionId })
       });
-      const data = (await res.json()) as ChatServerResponse;
+      const data = (await res.json()) as ChatServerResponse & { error?: string; details?: string };
+      if (!res.ok) {
+        const errMsg = data?.error || data?.details || 'সার্ভার  সমস্যা (API)';
+        setMessages(m => [...m, { role: 'assistant', content: `দুঃখিত, উত্তর আনতে সমস্যা হয়েছে: ${errMsg}` }]);
+        return;
+      }
       const reply = data?.reply || 'দুঃখিত, উত্তর আনতে সমস্যা হয়েছে।';
       setMessages(m => [...m, { role: 'assistant', content: reply }]);
       setSuggestAction(data || null);
