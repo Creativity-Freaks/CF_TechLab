@@ -51,7 +51,7 @@ export const About = () => {
                 Merging artistic vision with technological prowess to create unique experiences
               </p>
             </CardContent>
-          </Card>
+          </Card> 
 
           <Card className="group border-border/50 bg-card hover:border-accent/50 transition-all duration-300 hover:shadow-glow-primary hover:scale-105 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <CardContent className="p-6 text-center">
