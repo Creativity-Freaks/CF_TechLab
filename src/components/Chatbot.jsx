@@ -20,7 +20,7 @@ export default function Chatbot() {
   return (
     <iframe
       id="cf-chatbot-iframe"
-      src="https://web-production-c764.up.railway.app/widget"
+      src={`${import.meta.env.VITE_CHATBOT_WIDGET_URL || 'https://cf-techlab-bot-taaw.onrender.com/widget'}?v=${Date.now()}`}
       style={{
         position: 'fixed',
         bottom: 0,
