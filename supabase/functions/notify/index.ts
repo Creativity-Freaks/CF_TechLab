@@ -47,8 +47,18 @@ Deno.serve(async (req) => {
     return new Response('Forbidden', { status: 403, headers: getCorsHeaders(req) });
   }
   let body: EventBody;
-  try { body = await req.json(); } catch { return new Response('Bad JSON', { status: 400, headers: corsHeaders }); }
-  if (!body?.type || !body?.id) return new Response('Missing fields', { status: 400, headers: corsHeaders });
+  try { body = await req.json(); } catch { return new Response('Bad JSON', { status: 400, headers: getCorsHeaders(req) }); }
+  if (!body?.type || !body?.id) return new Response('Missing fields', { status: 400, headers: getCorsHeaders(req) });
+  // Minimal input validation
+  const allowedTypes = ['contact','testimonial','project','service-request','chat'];
+  if (!allowedTypes.includes(body.type)) {
+    return new Response('Invalid type', { status: 400, headers: getCorsHeaders(req) });
+  }
+  const meta = (body.meta && typeof body.meta === 'object') ? body.meta : {};
+  const email = typeof meta?.email === 'string' ? meta.email : null;
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    return new Response('Invalid email', { status: 400, headers: getCorsHeaders(req) });
+  }
   try { console.log('[notify] incoming', { type: body.type, id: body.id }); } catch (_e) { /* ignore logging errors */ }
 
   const apiKey = Deno.env.get('RESEND_API_KEY');

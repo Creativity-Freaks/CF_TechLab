@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Header } from '@/components/Header';
@@ -59,6 +60,13 @@ export default function AdminProjectsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Admin – Add Project</title>
+        <meta name="robots" content="noindex,nofollow" />
+        {import.meta.env.VITE_SITE_URL && (
+          <link rel="canonical" href={`${import.meta.env.VITE_SITE_URL}/admin/projects`} />
+        )}
+      </Helmet>
       <Header />
       <main className="pt-24 pb-20 px-4 max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Admin: Add Project</h1>

@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useApproveTestimonial, useDeleteTestimonial } from '@/hooks/useMutations';
@@ -80,6 +81,13 @@ export default function AdminTestimonialsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Admin – Pending Testimonials</title>
+        <meta name="robots" content="noindex,nofollow" />
+        {import.meta.env.VITE_SITE_URL && (
+          <link rel="canonical" href={`${import.meta.env.VITE_SITE_URL}/admin/testimonials`} />
+        )}
+      </Helmet>
       <Header />
       <main className="pt-24 pb-20 px-4 max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
@@ -98,6 +106,13 @@ export default function AdminTestimonialsPage() {
                   <h3 className="font-semibold">{t.name}</h3>
                   <p className="text-xs text-muted-foreground">{t.role}</p>
                 </div>
+            <Helmet>
+              <title>Admin – Pending Testimonials</title>
+              <meta name="robots" content="noindex,nofollow" />
+              {import.meta.env.VITE_SITE_URL && (
+                <link rel="canonical" href={`${import.meta.env.VITE_SITE_URL}/admin/testimonials`} />
+              )}
+            </Helmet>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">{t.content}</p>
               <div className="flex items-center gap-3 pt-2">
