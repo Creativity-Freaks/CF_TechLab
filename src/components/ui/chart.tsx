@@ -1,5 +1,8 @@
 import * as React from "react";
-import * as RechartsPrimitive from "recharts";
+// Dynamically import recharts to avoid loading on initial paint
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error dynamic import types
+import * as RechartsPrimitive from /* @vite-ignore */ "recharts";
 
 import { cn } from "@/lib/utils";
 

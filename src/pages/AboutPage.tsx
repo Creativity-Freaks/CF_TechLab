@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { Lightbulb, Users, Rocket, Award, Target, Zap } from "lucide-react";
@@ -60,6 +61,19 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>About CF TechLab</title>
+        <meta name="description" content="Learn about CF TechLab's mission, values, and achievements in AI, AR/VR, automation, and future-forward digital solutions." />
+        {import.meta.env.VITE_SITE_URL && (
+          <link rel="canonical" href={`${import.meta.env.VITE_SITE_URL}/about`} />
+        )}
+        <meta property="og:title" content="About CF TechLab" />
+        <meta property="og:description" content="Our mission is to empower creativity with cutting-edge technology." />
+        {import.meta.env.VITE_SITE_URL && (
+          <meta property="og:url" content={`${import.meta.env.VITE_SITE_URL}/about`} />
+        )}
+        <meta name="twitter:card" content="summary" />
+      </Helmet>
       <Header />
       
       <main className="pt-20">

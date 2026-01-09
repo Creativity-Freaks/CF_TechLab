@@ -8,20 +8,27 @@
 
 interface EventBody { type: 'contact' | 'testimonial' | 'project' | 'service-request' | 'chat'; id: string; meta?: Record<string, unknown>; }
 
-// Basic CORS headers so browser (localhost dev) can call this function directly
-const corsHeaders: Record<string,string> = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Max-Age': '86400'
-};
+// Configurable CORS: allow only origins from env ALLOWED_ORIGINS (comma-separated)
+function getCorsHeaders(req: Request): Record<string,string> {
+  const allowed = (Deno.env.get('ALLOWED_ORIGINS') || '*').split(',').map(s => s.trim()).filter(Boolean);
+  const reqOrigin = req.headers.get('Origin') || '';
+  const originAllowed = allowed.includes('*') || (reqOrigin && allowed.includes(reqOrigin));
+  const allowOrigin = originAllowed ? (reqOrigin || '*') : 'null';
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Max-Age': '86400'
+  };
+}
 
-function jsonResponse(body: unknown, init: ResponseInit = {}) {
+function jsonResponse(body: unknown, init: ResponseInit = {}, req?: Request) {
+  const cors = req ? getCorsHeaders(req) : {};
   return new Response(typeof body === 'string' ? body : JSON.stringify(body), {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      ...corsHeaders,
+      ...cors,
       ...(init.headers || {})
     }
   });
@@ -29,9 +36,16 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers: corsHeaders });
+    return new Response(null, { status: 200, headers: getCorsHeaders(req) });
   }
-  if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+  if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: getCorsHeaders(req) });
+  // Block disallowed origins on POST
+  const allowed = (Deno.env.get('ALLOWED_ORIGINS') || '*').split(',').map(s => s.trim()).filter(Boolean);
+  const reqOrigin = req.headers.get('Origin') || '';
+  const originAllowed = allowed.includes('*') || (reqOrigin && allowed.includes(reqOrigin));
+  if (!originAllowed) {
+    return new Response('Forbidden', { status: 403, headers: getCorsHeaders(req) });
+  }
   let body: EventBody;
   try { body = await req.json(); } catch { return new Response('Bad JSON', { status: 400, headers: corsHeaders }); }
   if (!body?.type || !body?.id) return new Response('Missing fields', { status: 400, headers: corsHeaders });
@@ -43,7 +57,7 @@ Deno.serve(async (req) => {
   const sendUserAck = (Deno.env.get('SEND_USER_ACK') || 'false') === 'true';
   const brand = Deno.env.get('BRAND_NAME') || 'CF TechLab';
   const ackPrefix = Deno.env.get('ACK_SUBJECT_PREFIX') || `Thanks for contacting ${brand}`;
-  if (!apiKey || !toRaw) return new Response('Not configured', { status: 501, headers: corsHeaders });
+  if (!apiKey || !toRaw) return new Response('Not configured', { status: 501, headers: getCorsHeaders(req) });
   const toList = toRaw.split(',').map(s => s.trim()).filter(Boolean);
 
   const subjectMap: Record<string,string> = {
@@ -67,7 +81,7 @@ Deno.serve(async (req) => {
   });
   if (!res.ok) {
     const txt = await res.text();
-    return new Response('Send failed: '+txt, { status: 500, headers: corsHeaders });
+    return new Response('Send failed: '+txt, { status: 500, headers: getCorsHeaders(req) });
   }
   // User acknowledgement (debug aware)
   let ackStatus = 'skipped';
@@ -95,5 +109,5 @@ Deno.serve(async (req) => {
       ackError = (e as Error).message;
     }
   }
-  return new Response(JSON.stringify({ ok: true, ackStatus, ackError }), { status: 200, headers: { 'Content-Type':'application/json', ...corsHeaders } });
+  return jsonResponse({ ok: true, ackStatus, ackError }, { status: 200 }, req);
 });

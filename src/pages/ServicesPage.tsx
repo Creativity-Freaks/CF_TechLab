@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Helmet } from "react-helmet-async";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -174,6 +175,19 @@ export default function ServicesPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Services – CF TechLab</title>
+        <meta name="description" content="Explore CF TechLab's services: AI tools, web/mobile apps, AR/VR, automation, and smart creative software." />
+        {import.meta.env.VITE_SITE_URL && (
+          <link rel="canonical" href={`${import.meta.env.VITE_SITE_URL}/services`} />
+        )}
+        <meta property="og:title" content="Services – CF TechLab" />
+        <meta property="og:description" content="Select solutions you need and request a consultation." />
+        {import.meta.env.VITE_SITE_URL && (
+          <meta property="og:url" content={`${import.meta.env.VITE_SITE_URL}/services`} />
+        )}
+        <meta name="twitter:card" content="summary" />
+      </Helmet>
       <Header />
       <main className="pt-20">
         <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">

@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
@@ -50,6 +51,19 @@ export default function ProjectsPage() {
   }, [paginated.isLoading, paginated.isSuccess, paginated.isError, paginated.data]);
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Projects – CF TechLab</title>
+        <meta name="description" content="Browse CF TechLab projects across AI, web/mobile, AR/VR, and automation." />
+        {import.meta.env.VITE_SITE_URL && (
+          <link rel="canonical" href={`${import.meta.env.VITE_SITE_URL}/projects`} />
+        )}
+        <meta property="og:title" content="Projects – CF TechLab" />
+        <meta property="og:description" content="Explore our portfolio of innovative solutions and success stories." />
+        {import.meta.env.VITE_SITE_URL && (
+          <meta property="og:url" content={`${import.meta.env.VITE_SITE_URL}/projects`} />
+        )}
+        <meta name="twitter:card" content="summary" />
+      </Helmet>
       <Header />
       
       <main className="pt-20">
