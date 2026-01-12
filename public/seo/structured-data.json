@@ -1,0 +1,39 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://cftechlab.hcsarker.me/#org",
+      "name": "CF TechLab",
+      "url": "https://cftechlab.hcsarker.me",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://cftechlab.hcsarker.me/cftech.png"
+      },
+      "sameAs": [
+        "https://creativityfreaks.com"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://cftechlab.hcsarker.me/#website",
+      "url": "https://cftechlab.hcsarker.me",
+      "name": "CF TechLab",
+      "publisher": { "@id": "https://cftechlab.hcsarker.me/#org" },
+      "inLanguage": "en",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.google.com/search?q=site:cftechlab.hcsarker.me+{search_term}",
+        "query-input": "required name=search_term"
+      }
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://cftechlab.hcsarker.me/#home",
+      "url": "https://cftechlab.hcsarker.me/",
+      "name": "CF TechLab - Technology & Innovation",
+      "isPartOf": { "@id": "https://cftechlab.hcsarker.me/#website" },
+      "about": { "@id": "https://cftechlab.hcsarker.me/#org" }
+    }
+  ]
+}

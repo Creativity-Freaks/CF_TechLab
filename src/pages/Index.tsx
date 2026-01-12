@@ -8,12 +8,12 @@ import { CTA } from "@/components/CTA";
 import Footer from "@/components/Footer";
 
 // Lazy-load below-the-fold sections to reduce initial bundle/TTI
-const Projects = lazy(() => import("@/components/Projects"));
-const FreakFlow = lazy(() => import("@/components/FreakFlow"));
-const Testimonials = lazy(() => import("@/components/Testimonials"));
-const Partners = lazy(() => import("@/components/Partners"));
-const FAQ = lazy(() => import("@/components/FAQ"));
-const Contact = lazy(() => import("@/components/Contact"));
+const Projects = lazy(() => import("@/components/Projects").then(m => ({ default: m.Projects })));
+const FreakFlow = lazy(() => import("@/components/FreakFlow").then(m => ({ default: m.FreakFlow })));
+const Testimonials = lazy(() => import("@/components/Testimonials").then(m => ({ default: m.Testimonials })));
+const Partners = lazy(() => import("@/components/Partners").then(m => ({ default: m.Partners })));
+const FAQ = lazy(() => import("@/components/FAQ").then(m => ({ default: m.FAQ })));
+const Contact = lazy(() => import("@/components/Contact").then(m => ({ default: m.Contact })));
 // Home (landing) page aggregates overview sections only; no hash scrolling needed now.
 
 const Index = () => {

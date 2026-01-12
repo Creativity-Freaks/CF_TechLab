@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/</loc>
+    <loc>https://cftechlab.hcsarker.me/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>/about</loc>
+    <loc>https://cftechlab.hcsarker.me/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>/services</loc>
+    <loc>https://cftechlab.hcsarker.me/services</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>/projects</loc>
+    <loc>https://cftechlab.hcsarker.me/projects</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>/contact</loc>
+    <loc>https://cftechlab.hcsarker.me/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>/submit-testimonial</loc>
+    <loc>https://cftechlab.hcsarker.me/submit-testimonial</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
