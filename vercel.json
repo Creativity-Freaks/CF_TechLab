@@ -20,12 +20,7 @@
       ]
     }
   ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/assets/(.*)", "dest": "/assets/$1" },
-    { "src": "/cftech.png", "dest": "/cftech.png" },
-    { "src": "/placeholder.svg", "dest": "/placeholder.svg" },
-    { "src": "/favicon.ico", "dest": "/favicon.ico" },
-    { "src": "/.*", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
