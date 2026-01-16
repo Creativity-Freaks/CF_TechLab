@@ -12,6 +12,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import AdminProjectsPage from "./pages/AdminProjectsPage";
 import AdminTestimonialsPage from "./pages/AdminTestimonialsPage";
 import AdminServicesPage from "./pages/AdminServicesPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import RequireAdmin from "./components/RequireAdmin";
