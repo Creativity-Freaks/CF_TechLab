@@ -16,6 +16,7 @@ import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import RequireAdmin from "./components/RequireAdmin";
+import AdminLayout from "./layouts/AdminLayout";
 import ContactPage from "./pages/ContactPage";
 import TestimonialSubmitPage from "./pages/TestimonialSubmitPage.tsx";
 
@@ -36,11 +37,13 @@ const App = () => (
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin" element={<RequireAdmin />}>
-            <Route index element={<AdminDashboardPage />} />
-            <Route path="projects" element={<AdminProjectsPage />} />
-            <Route path="testimonials" element={<AdminTestimonialsPage />} />
-            <Route path="services" element={<AdminServicesPage />} />
-            <Route path="users" element={<AdminUsersPage />} />
+            <Route element={<AdminLayout />}>
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="projects" element={<AdminProjectsPage />} />
+              <Route path="testimonials" element={<AdminTestimonialsPage />} />
+              <Route path="services" element={<AdminServicesPage />} />
+              <Route path="users" element={<AdminUsersPage />} />
+            </Route>
           </Route>
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/submit-testimonial" element={<TestimonialSubmitPage />} />

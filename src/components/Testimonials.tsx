@@ -1,8 +1,9 @@
 import { Star, Quote } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from '@/lib/supabase';
 import { useTestimonials } from '@/hooks/useData';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from '@/components/ui/carousel';
 
 type Testimonial = {
   id: string;
@@ -18,8 +19,8 @@ export const Testimonials = () => {
   const [error, setError] = useState<string | null>(null);
   const testimonialsQuery = useTestimonials();
   const groupSize = 3; // number shown per slide
-  const [autoIndex, setAutoIndex] = useState(0); // rotates through groups of 3
-  // Fetch all testimonials by iterating batches sequentially.
+  const [api, setApi] = useState<CarouselApi | null>(null);
+  // Fetch all testimonials
   const fetchAll = useCallback(() => { testimonialsQuery.refetch(); }, [testimonialsQuery]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
@@ -28,31 +29,40 @@ export const Testimonials = () => {
     if (testimonialsQuery.isSuccess) {
       setTestimonials(testimonialsQuery.data);
       setError(null);
-      setAutoIndex(0);
+      // reset carousel to first slide
+      api?.scrollTo(0);
     } else if (testimonialsQuery.isError) {
       setError('Failed to load testimonials');
     }
-  }, [testimonialsQuery.isSuccess, testimonialsQuery.isError, testimonialsQuery.data]);
+  }, [testimonialsQuery.isSuccess, testimonialsQuery.isError, testimonialsQuery.data, api]);
 
-  // Listen for new submissions and refresh first batch (replace existing) then reset rotation
+  // Listen for new submissions and refresh
   useEffect(() => {
     const handler = () => {
       fetchAll();
-      setAutoIndex(0);
+      api?.scrollTo(0);
     };
     window.addEventListener('testimonial-submitted', handler);
     return () => window.removeEventListener('testimonial-submitted', handler);
-  }, [fetchAll]);
+  }, [fetchAll, api]);
 
-  // Auto rotate every 5s if more than one group has been loaded
-  useEffect(() => {
-    if (testimonials.length <= groupSize) return; // no need to rotate
-    const groups = Math.ceil(testimonials.length / groupSize);
-    const id = setInterval(() => {
-      setAutoIndex(prev => (prev + 1) % groups);
-    }, 5000);
-    return () => clearInterval(id);
+  // Build slide groups to keep height stable and avoid layout shift
+  const groups = useMemo(() => {
+    const arr: Testimonial[][] = [];
+    for (let i = 0; i < testimonials.length; i += groupSize) {
+      arr.push(testimonials.slice(i, i + groupSize));
+    }
+    return arr;
   }, [testimonials]);
+
+  // Autoplay: advance carousel every 6s without re-rendering the whole section
+  useEffect(() => {
+    if (!api || groups.length <= 1) return;
+    const id = setInterval(() => {
+      api.scrollNext();
+    }, 6000);
+    return () => clearInterval(id);
+  }, [api, groups.length]);
 
   // No manual load more; all batches fetched automatically.
   return (
@@ -76,57 +86,50 @@ export const Testimonials = () => {
             {"No testimonials are published yet. Submitted testimonials appear here once approved."}
           </div>
         )}
-        {testimonials.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 transition-opacity">
-            {testimonials
-              .slice(autoIndex * groupSize, autoIndex * groupSize + groupSize)
-              .map((testimonial, index) => (
-              <Card
-                key={testimonial.id}
-                className="p-5 sm:p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/50 transition-all duration-500 hover:shadow-glow-primary animate-fade-in hover:scale-105 hover:-translate-y-2 group"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <Quote className="w-10 h-10 sm:w-12 sm:h-12 text-primary/30 mb-4 group-hover:text-primary/50 group-hover:scale-110 transition-all" />
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-4 h-4 sm:w-5 sm:h-5 fill-primary text-primary group-hover:scale-110 transition-transform"
-                      style={{ transitionDelay: `${i * 50}ms` }}
-                    />
-                  ))}
-                </div>
-                <p className="text-muted-foreground mb-6 leading-relaxed text-sm sm:text-base">
-                  "{testimonial.content}"
-                </p>
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <img
-                    src={testimonial.image.startsWith('/uploads') ? `${window.location.origin}${testimonial.image}` : testimonial.image}
-                    alt={testimonial.name}
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-primary/30 group-hover:border-primary/60 transition-all group-hover:scale-110"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-sm sm:text-base group-hover:text-primary transition-colors">{testimonial.name}</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</p>
+        {groups.length > 0 && (
+          <Carousel setApi={setApi} opts={{ loop: true }} className="relative">
+            <CarouselContent className="gap-6 sm:gap-8">
+              {groups.map((group, gi) => (
+                <CarouselItem key={gi} className="basis-full">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    {group.map((testimonial) => (
+                      <Card
+                        key={testimonial.id}
+                        className="p-5 sm:p-6 bg-gradient-to-br from-background to-card/70 backdrop-blur border border-primary/20 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+                      >
+                        <Quote className="w-10 h-10 sm:w-12 sm:h-12 text-primary/40 mb-4 group-hover:text-primary/60 transition-all" />
+                        <div className="flex gap-1 mb-4">
+                          {Array.from({ length: testimonial.rating }).map((_, i) => (
+                            <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-primary text-primary" />
+                          ))}
+                        </div>
+                        <p className="text-muted-foreground mb-6 leading-relaxed text-sm sm:text-base">
+                          "{testimonial.content}"
+                        </p>
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <img
+                            src={testimonial.image.startsWith('/uploads') ? `${window.location.origin}${testimonial.image}` : testimonial.image}
+                            alt={testimonial.name}
+                            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-primary/30"
+                          />
+                          <div>
+                            <h4 className="font-semibold text-sm sm:text-base">{testimonial.name}</h4>
+                            <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-        {testimonials.length > groupSize && !error && (
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <div className="flex gap-2">
-              {Array.from({ length: Math.ceil(testimonials.length / groupSize) }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setAutoIndex(i)}
-                  className={`w-3 h-3 rounded-full border border-primary/40 transition ${i === autoIndex ? 'bg-primary' : 'bg-transparent hover:bg-primary/30'}`}
-                  aria-label={`Show testimonials group ${i + 1}`}
-                />
+                </CarouselItem>
               ))}
-            </div>
-          </div>
+            </CarouselContent>
+            {groups.length > 1 && (
+              <>
+                <CarouselPrevious className="hidden sm:flex" />
+                <CarouselNext className="hidden sm:flex" />
+              </>
+            )}
+          </Carousel>
         )}
       </div>
     </section>
