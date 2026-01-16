@@ -33,9 +33,9 @@ add_one() {
     value=${value%"}
   fi
   printf "\n[env] Adding %s (preview)\n" "$key"
-  vercel env add "$key" preview <<< "$value" || true
+  printf '%s\n' "$value" | vercel env add "$key" preview || true
   printf "[env] Adding %s (production)\n" "$key"
-  vercel env add "$key" production <<< "$value" || true
+  printf '%s\n' "$value" | vercel env add "$key" production || true
 }
 
 while IFS= read -r line; do
