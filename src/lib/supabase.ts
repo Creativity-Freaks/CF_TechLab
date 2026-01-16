@@ -10,12 +10,18 @@ if (!url || !anonKey) {
 }
 
 export const supabase = (url && anonKey) ? createClient(url, anonKey, {
-  auth: { persistSession: false }
+  auth: { persistSession: true }
 }) : null;
 
 const bucket = (import.meta.env.VITE_SUPABASE_BUCKET as string | undefined) || 'uploads';
 
 export type Tables = {
+  admins: {
+    id: string;
+    email: string;
+    role: 'admin' | 'subadmin';
+    created_at: string;
+  };
   services: {
     id: string;
     title: string;

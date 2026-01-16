@@ -11,6 +11,10 @@ import ServicesPage from "./pages/ServicesPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import AdminProjectsPage from "./pages/AdminProjectsPage";
 import AdminTestimonialsPage from "./pages/AdminTestimonialsPage";
+import AdminServicesPage from "./pages/AdminServicesPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import RequireAdmin from "./components/RequireAdmin";
 import ContactPage from "./pages/ContactPage";
 import TestimonialSubmitPage from "./pages/TestimonialSubmitPage.tsx";
 
@@ -29,8 +33,14 @@ const App = () => (
           <Route path="/about" element={<AboutPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/admin/projects" element={<AdminProjectsPage />} />
-          <Route path="/admin/testimonials" element={<AdminTestimonialsPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={<RequireAdmin />}>
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="projects" element={<AdminProjectsPage />} />
+            <Route path="testimonials" element={<AdminTestimonialsPage />} />
+            <Route path="services" element={<AdminServicesPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+          </Route>
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/submit-testimonial" element={<TestimonialSubmitPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

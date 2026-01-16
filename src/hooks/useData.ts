@@ -120,3 +120,21 @@ export function useProjectCount(): UseQueryResult<number> {
     staleTime: 1000 * 60 * 5,
   });
 }
+
+// Admin directory
+export interface AdminUser { id: string; email: string; role: 'admin' | 'subadmin'; createdAt: string; }
+export function useAdmins(): UseQueryResult<AdminUser[]> {
+  return useQuery({
+    queryKey: ['admins'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('supabase_not_configured');
+      const { data, error } = await supabase
+        .from('admins')
+        .select('id,email,role,created_at')
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      return (data || []).map(r => ({ id: r.id, email: r.email, role: r.role, createdAt: r.created_at }));
+    },
+    staleTime: 1000 * 60 * 1,
+  });
+}
