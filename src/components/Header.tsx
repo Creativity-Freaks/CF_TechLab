@@ -51,6 +51,8 @@ export const Header = () => {
             <button onClick={() => routeTo('/about')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</button>
             <button onClick={() => routeTo('/services')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Services</button>
             <button onClick={() => routeTo('/projects')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Projects</button>
+            <button onClick={() => routeTo('/products')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Products</button>
+            <button onClick={() => routeTo('/blog')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</button>
             <Button onClick={() => navigate('/contact')} variant="hero" size="sm">Contact Us</Button>
           </div>
 
@@ -71,6 +73,8 @@ export const Header = () => {
               <button onClick={() => routeTo('/about')} className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left">About</button>
               <button onClick={() => routeTo('/services')} className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left">Services</button>
               <button onClick={() => routeTo('/projects')} className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left">Projects</button>
+              <button onClick={() => routeTo('/products')} className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left">Products</button>
+              <button onClick={() => routeTo('/blog')} className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left">Blog</button>
               <Button onClick={() => navigate('/contact')} variant="hero" size="sm" className="w-full">Contact Us</Button>
             </div>
           </div>

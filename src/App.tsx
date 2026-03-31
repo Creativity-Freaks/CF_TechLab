@@ -19,6 +19,10 @@ import RequireAdmin from "./components/RequireAdmin";
 import AdminLayout from "./layouts/AdminLayout";
 import ContactPage from "./pages/ContactPage";
 import TestimonialSubmitPage from "./pages/TestimonialSubmitPage.tsx";
+import ProductsPage from "./pages/ProductsPage";
+import BlogPage from "./pages/BlogPage";
+import FAQPage from "./pages/FAQPage";
+import FreakFlowPage from "./pages/FreakFlowPage";
 
 
 const queryClient = new QueryClient();
@@ -47,6 +51,10 @@ const App = () => (
           </Route>
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/submit-testimonial" element={<TestimonialSubmitPage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/freakflow" element={<FreakFlowPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
           </Routes>
